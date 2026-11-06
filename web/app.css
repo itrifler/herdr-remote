@@ -406,9 +406,12 @@ body { font-family: var(--font-mono); background: var(--bg); color: var(--text);
 /* The vertical scroller holds the conversation above the terminal, so the two read as one page. The
    mirror keeps sideways scrolling for itself: a long line must not carry the turns off screen. */
 .term-scroll { flex: 1; min-height: 0; min-width: 0; display: flex; flex-direction: column; overflow-x: hidden; overflow-y: auto; background: var(--term-bg); -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
-/* On the app's own colours rather than the mirror's forced dark, because a custom palette is only
-   guaranteed to contrast with its own surface. */
-.term-inline { flex: none; padding: 12px 12px 0; background: var(--surface); color: var(--text); font-size: 0.8rem; line-height: 1.5; }
+/* Dark under every theme, because it reads as one page with the mirror below it. The tokens are
+   restated as the dark palette's values rather than left to `color-scheme`: a custom palette sets
+   them on the root as plain colours, and its dark text would land on this dark ground. */
+.term-inline { flex: none; padding: 12px 12px 0; color-scheme: dark; background: var(--term-bg); color: var(--term-text); font-size: 0.8rem; line-height: 1.5;
+  --bg: #0a0a0a; --surface: #171717; --border: #2e2e2e; --text: #fafafa; --muted: #a1a1a1;
+  --green: #4ac777; --red: #ff5e5e; --blue: #59aaf8; --orange: #f4b93c; --on-accent: #0a0a0a; }
 .term-inline[hidden] { display: none; }
 .term-inline .hist-live { margin: 8px -12px 0; padding: 4px 12px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.65rem; text-align: center; }
 .term-content { flex: 1 0 auto; min-width: 0; overflow-x: auto; overflow-y: hidden; padding: 10px 12px; background: var(--term-bg); color-scheme: dark; font-family: var(--font-term); font-size: clamp(0.68rem, 2.7vw, 0.8rem); line-height: 1.35; white-space: pre; color: var(--term-text); -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }

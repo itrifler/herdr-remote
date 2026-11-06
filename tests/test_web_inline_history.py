@@ -463,6 +463,69 @@ class SharedWithThePanelTests(_Base):
         self.assertEqual(look["whiteSpace"], "normal")
 
 
+class SameGroundAsTheTerminalTests(_Base):
+    """The two read as one page, so they share one ground under every theme."""
+
+    def setUp(self):
+        super().setUp()
+        self.open("wB:pA")
+        self.to_top()
+        self.answer("wB:pA", messages=turns(0, 4), total=4)
+
+    def tearDown(self):
+        self.page.evaluate("""() => {
+          const root = document.documentElement;
+          delete root.dataset.theme;
+          root.removeAttribute('style');
+        }""")
+        super().tearDown()
+
+    def look(self):
+        return self.page.evaluate("""() => {
+          const css = s => getComputedStyle(document.querySelector(s));
+          return {inline: css('#termInlineHistory').backgroundColor,
+                  term: css('#termContent').backgroundColor,
+                  text: css('#termInlineHistory .msg.assistant .msg-text').color,
+                  muted: css('#termInlineHistory .msg-role').color,
+                  bubble: css('#termInlineHistory .msg.user .msg-text').backgroundColor,
+                  scheme: css('#termInlineHistory').colorScheme};
+        }""")
+
+    def assert_dark(self):
+        look = self.look()
+        self.assertEqual(look["inline"], look["term"])
+        self.assertEqual(look["text"], "rgb(250, 250, 250)")
+        self.assertEqual(look["scheme"], "dark")
+        # Either a plain dark value or a mix: whatever the form, not a light fill.
+        self.assertNotIn("255, 255, 255", look["bubble"])
+        self.assertNotRegex(look["bubble"], r"0\.9\d*\s*\d*\.?\d*\s*\d*\.?\d*\s*\)$")
+
+    def test_under_the_light_theme(self):
+        self.page.evaluate("document.documentElement.dataset.theme = 'light'")
+        self.assert_dark()
+
+    def test_under_the_dark_theme(self):
+        self.page.evaluate("document.documentElement.dataset.theme = 'dark'")
+        self.assert_dark()
+
+    def test_under_a_light_custom_palette(self):
+        """Its dark text would otherwise land on the terminal's dark ground, unreadable."""
+        self.page.evaluate("""() => {
+          const root = document.documentElement;
+          root.dataset.theme = 'light';
+          for (const [k, v] of Object.entries({bg: '#fff8e7', surface: '#ffffff', border: '#ccbbaa',
+              text: '#201000', muted: '#554433', green: '#005500', red: '#880000', blue: '#000088',
+              orange: '#663300', 'on-accent': '#ffffff'})) root.style.setProperty('--' + k, v);
+        }""")
+        self.assert_dark()
+
+    def test_the_page_around_it_keeps_its_theme(self):
+        self.page.evaluate("document.documentElement.dataset.theme = 'light'")
+        self.assertEqual(
+            self.page.eval_on_selector(".term-header", "e => getComputedStyle(e).colorScheme"),
+            "light")
+
+
 class ShortOutputTests(_Base):
     """A desktop window can fit the whole screen, and then no scroll event can ever fire."""
     viewport = DESKTOP

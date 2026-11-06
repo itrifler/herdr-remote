@@ -346,8 +346,9 @@ see nothing but terminal text.
   landing, since a mirror barely taller than its box is already within 50px of the bottom at its top.
 - **A reader in the history is not moved by a tick.** The mirror is below them, so the "keep distance
   from the bottom" fix-up is skipped; a render anchors on that same distance so turns can land above.
-- **The turns use the app's colours, not the mirror's forced dark,** because a custom palette only
-  promises contrast against its own surface.
+- **The turns are dark under every theme,** because they read as one page with the mirror. `.term-inline`
+  restates the dark palette's values, since a custom palette sets the tokens on the root as plain
+  colours and its dark text would land on the dark ground. The panel keeps the app's theme.
 - **A short mirror cannot scroll,** so on a tall desktop window no scroll event ever fires. A wheel-up
   or a downward drag over it makes the first request instead.
 
